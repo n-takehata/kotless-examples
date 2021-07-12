@@ -19,6 +19,16 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+kotless {
+    //<...>
+    extensions {
+        local {
+            //enable AWS emulation (disabled by default)
+            useAWSEmulation = true
+        }
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }
