@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import io.kotless.plugin.gradle.dsl.kotless
 
 plugins {
-    kotlin("jvm") version "1.5.20"
+    kotlin("jvm") version "1.4.21" apply true
     id("io.kotless") version "0.1.6" apply true
 }
 
@@ -17,16 +17,6 @@ repositories {
 dependencies {
     implementation("io.kotless", "kotless-lang", "0.1.6")
     testImplementation(kotlin("test"))
-}
-
-kotless {
-    //<...>
-    extensions {
-        local {
-            //enable AWS emulation (disabled by default)
-            useAWSEmulation = true
-        }
-    }
 }
 
 tasks.test {
