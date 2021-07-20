@@ -19,6 +19,24 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+kotless {
+    config {
+        bucket = "kotless-example-takehata"
+
+        terraform {
+            profile = "default"
+            region = "us-west-2"
+        }
+    }
+
+    webapp {
+        lambda {
+            memoryMb = 1024
+            timeoutSec = 120
+        }
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }
