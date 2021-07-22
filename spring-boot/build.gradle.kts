@@ -1,3 +1,4 @@
+import io.kotless.plugin.gradle.dsl.kotless
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -16,6 +17,33 @@ repositories {
 dependencies {
     implementation("io.kotless", "spring-boot-lang", "0.1.6")
     testImplementation(kotlin("test"))
+}
+
+kotless {
+    // Change to your AWS configuration
+    config {
+        // This is a bucket name for Amazon S3
+        bucket = "kotless-example-takehata"
+
+        terraform {
+            // This is credentials for AWS
+            profile = "default"
+            region = "us-west-2"
+        }
+    }
+
+    webapp {
+        lambda {
+            memoryMb = 1024
+            timeoutSec = 120
+        }
+    }
+
+    extensions {
+        terraform {
+            allowDestroy = true
+        }
+    }
 }
 
 tasks.test {
