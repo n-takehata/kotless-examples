@@ -26,7 +26,7 @@ kotless {
         bucket = "kotless-example-takehata"
 
         terraform {
-            // This is a bucket name for Amazon S3
+            // This is credentials for AWS
             profile = "default"
             region = "us-west-2"
         }
