@@ -1,3 +1,0 @@
-
-rootProject.name = "kotless-example"
-

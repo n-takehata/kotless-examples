@@ -6,7 +6,7 @@ plugins {
     id("io.kotless") version "0.1.6" apply true
 }
 
-group = "me.n-takehata"
+group = "com.example.kotless.takehata"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -20,10 +20,13 @@ dependencies {
 }
 
 kotless {
+    // Change to your AWS configuration
     config {
+        // This is a bucket name for Amazon S3
         bucket = "kotless-example-takehata"
 
         terraform {
+            // This is a bucket name for Amazon S3
             profile = "default"
             region = "us-west-2"
         }
