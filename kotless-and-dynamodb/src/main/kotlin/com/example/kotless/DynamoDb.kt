@@ -7,7 +7,7 @@ import io.kotless.AwsResource
 import io.kotless.dsl.lang.withKotlessLocal
 
 fun findItem(): String {
-    val client = AmazonDynamoDBClientBuilder.standard().withKotlessLocal(AwsResource.DynamoDB).build()
+    val client = AmazonDynamoDBClientBuilder.defaultClient()
     val request = GetItemRequest()
         .withKey(mapOf("id" to AttributeValue().withN("101")))
         .withTableName("Commodity")
