@@ -86,7 +86,7 @@ fun putTweetList(): List<Tweet> {
     list.forEach {
         val values = mapOf(
             "id" to AttributeValue().withN(it.id.toString()),
-            "time" to AttributeValue().withS(it.time.toString()),
+            "time" to AttributeValue().withN(it.time.atZone(ZoneId.systemDefault()).toEpochSecond().toString()),
             "text" to AttributeValue().withS(it.text)
         )
         val request = PutItemRequest().withItem(values).withTableName("Tweet")
