@@ -68,8 +68,13 @@ fun putTweetList(): List<Tweet> {
     val accountName = "n_takehata"
     val twitterUser = twitter.showUser(accountName)
 
-    val since = TIME_FORMAT.format(2021, 12, 11, 0, 0, 0)
-    val until = TIME_FORMAT.format(2021, 12, 11, 23, 59, 59)
+    val lastDate = LocalDateTime.now(ZoneId.of("Asia/Tokyo")).minusDays(1)
+    val year = lastDate.year
+    val month = lastDate.month.value
+    val day = lastDate.dayOfMonth
+
+    val since = TIME_FORMAT.format(year, month, day, 0, 0, 0)
+    val until = TIME_FORMAT.format(year, month, day, 23, 59, 59)
 
     val query = Query("from:$accountName since:$since until:$until")
     val queryResults = twitter.search(query).tweets
@@ -86,8 +91,6 @@ fun putTweetList(): List<Tweet> {
         )
         val request = PutItemRequest().withItem(values).withTableName("Tweet")
         val result = client.putItem(request)
-        println("tweet: $it")
-        println("result: $result")
     }
 
     return list
