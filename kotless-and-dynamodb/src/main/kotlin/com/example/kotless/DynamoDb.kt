@@ -4,15 +4,18 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest
-import io.kotless.dsl.lang.event.Scheduled
+import dev.akkinoc.util.YamlResourceBundle
 import twitter4j.Paging
 import twitter4j.Query
 import twitter4j.TwitterFactory
 import twitter4j.conf.ConfigurationBuilder
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.ResourceBundle
 
 const val TIME_FORMAT = "\"%d-%02d-%02d_%02d:%02d:%02d_JST\""
+
+val twitterConfig = ResourceBundle.getBundle("twitter", YamlResourceBundle.Control)
 
 fun putItem(): String {
     val id = (Math.random() * 1000).toInt().toString()
@@ -55,10 +58,10 @@ private fun putItemEveryMinute() {
 fun putTweetList(): List<Tweet> {
     val cb = ConfigurationBuilder()
     cb.setDebugEnabled(true)
-        .setOAuthConsumerKey("XXXXXXXXXXXXXXXXXXX")
-        .setOAuthConsumerSecret("XXXXXXXXXXXXXXXXXXX")
-        .setOAuthAccessToken("XXXXXXXXXXXXXXXXXXX")
-        .setOAuthAccessTokenSecret("XXXXXXXXXXXXXXXXXXX")
+        .setOAuthConsumerKey(twitterConfig.getString("consume_key"))
+        .setOAuthConsumerSecret(twitterConfig.getString("consume_secret"))
+        .setOAuthAccessToken(twitterConfig.getString("access_token"))
+        .setOAuthAccessTokenSecret(twitterConfig.getString("access_token_secret"))
     val tf = TwitterFactory(cb.build())
 
     val twitter = tf.instance
@@ -95,10 +98,10 @@ fun getTweetListByMonthDay(accountName: String, month: Int, day: Int): Map<Int, 
 
     val cb = ConfigurationBuilder()
     cb.setDebugEnabled(true)
-        .setOAuthConsumerKey("XXXXXXXXXXXXXXXXXXX")
-        .setOAuthConsumerSecret("XXXXXXXXXXXXXXXXXXX")
-        .setOAuthAccessToken("XXXXXXXXXXXXXXXXXXX")
-        .setOAuthAccessTokenSecret("XXXXXXXXXXXXXXXXXXX")
+        .setOAuthConsumerKey(twitterConfig.getString("consume_key"))
+        .setOAuthConsumerSecret(twitterConfig.getString("consume_secret"))
+        .setOAuthAccessToken(twitterConfig.getString("access_token"))
+        .setOAuthAccessTokenSecret(twitterConfig.getString("access_token_secret"))
     val tf = TwitterFactory(cb.build())
 
     val twitter = tf.instance

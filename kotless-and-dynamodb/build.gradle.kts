@@ -18,6 +18,7 @@ dependencies {
     implementation("io.kotless", "kotless-lang", "0.1.7-beta-5")
     implementation("com.amazonaws:aws-java-sdk-dynamodb:1.12.126")
     implementation("org.twitter4j:twitter4j-core:4.0.7")
+    implementation("dev.akkinoc.util:yaml-resource-bundle:2.1.0")
     testImplementation(kotlin("test"))
 }
 
