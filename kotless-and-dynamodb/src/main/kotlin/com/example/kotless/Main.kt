@@ -7,3 +7,6 @@ fun put() = putItem()
 
 @Get("/find")
 fun find() = findItem()
+
+@Get("/tweet")
+fun tweet() = putTweetList()
