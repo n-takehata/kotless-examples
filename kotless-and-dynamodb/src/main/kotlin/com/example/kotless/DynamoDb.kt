@@ -65,8 +65,7 @@ fun putTweetList(): List<Tweet> {
     val tf = TwitterFactory(cb.build())
 
     val twitter = tf.instance
-    val accountName = "n_takehata"
-    val twitterUser = twitter.showUser(accountName)
+    val accountName = twitterConfig.getString("account_name")
 
     val lastDate = LocalDateTime.now(ZoneId.of("Asia/Tokyo")).minusDays(1)
     val year = lastDate.year
@@ -97,6 +96,7 @@ fun putTweetList(): List<Tweet> {
 }
 
 fun getTweetListByMonthDay(accountName: String, month: Int, day: Int): Map<Int, List<Tweet>> {
+    // TODO DynamoDBからの取得に変更
     val paging = Paging(1, 5)
 
     val cb = ConfigurationBuilder()
