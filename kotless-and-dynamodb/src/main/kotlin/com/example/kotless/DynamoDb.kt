@@ -90,7 +90,7 @@ fun putTweetList(): List<Tweet> {
             "text" to AttributeValue().withS(it.text)
         )
         val request = PutItemRequest().withItem(values).withTableName("Tweet")
-        val result = client.putItem(request)
+        client.putItem(request)
     }
 
     return list
