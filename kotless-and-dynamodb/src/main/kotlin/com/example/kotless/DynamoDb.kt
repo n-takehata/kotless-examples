@@ -135,7 +135,6 @@ fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<Tweet>> {
 
         val queryResults = index.query(query)
 
-        println(queryResults.toList())
         tweetMap[year] = queryResults.map {
             Tweet(it.getLong("id"), LocalDateTime.now(), it.getString("tweet_text"))
         }
