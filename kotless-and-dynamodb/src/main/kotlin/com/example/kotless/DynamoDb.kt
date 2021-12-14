@@ -90,6 +90,7 @@ fun putTweetList(): List<Tweet> {
     list.forEach {
         val time = it.time
         val values = mapOf(
+            "id" to AttributeValue().withN(it.id.toString()),
             "tweet_date" to AttributeValue().withS(TABLE_DATE_FORMAT.format(time.year, time.month.value, time.dayOfMonth)),
             "tweet_time" to AttributeValue().withS(TABLE_TIME_FORMAT.format(time.hour, time.minute, time.second)),
             "tweet_text" to AttributeValue().withS(it.text)
@@ -102,10 +103,10 @@ fun putTweetList(): List<Tweet> {
 }
 
 fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<Tweet>> {
-    // TODO DynamoDBからの取得に変更
     val client = AmazonDynamoDBClientBuilder.defaultClient()
     val dynamoDb = DynamoDB(client)
     val table = dynamoDb.getTable("Tweet")
+    val index = table.getIndex("datetime-index")
 
     val cb = ConfigurationBuilder()
     cb.setDebugEnabled(true)
@@ -128,17 +129,15 @@ fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<Tweet>> {
         val until = "23:59:59"
 
         val query = QuerySpec()
-            .withProjectionExpression("tweet_date, tweet_time, tweet_text")
+            .withProjectionExpression("id, tweet_date, tweet_time, tweet_text")
             .withKeyConditionExpression("tweet_date = :v_date and tweet_time between :v_since and :v_until")
             .withValueMap(ValueMap().withString(":v_date", date).withString(":v_since", since).withString(":v_until", until))
 
-        val queryResults = table.query(query)
+        val queryResults = index.query(query)
 
         println(queryResults.toList())
         tweetMap[year] = queryResults.map {
-//            val instant = Instant.ofEpochSecond(it.getLong("tweet_timestamp"))
-//            Tweet(it.getLong("id"), LocalDateTime.ofInstant(instant, ZoneId.systemDefault()), it.getString("tweet_text"))
-            Tweet(1, LocalDateTime.now(), it.getString("tweet_text"))
+            Tweet(it.getLong("id"), LocalDateTime.now(), it.getString("tweet_text"))
         }
     }
 
