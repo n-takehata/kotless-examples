@@ -1,19 +1,24 @@
 package com.example.kotless
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
+import com.amazonaws.services.dynamodbv2.document.DynamoDB
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest
 import dev.akkinoc.util.YamlResourceBundle
-import twitter4j.Paging
 import twitter4j.Query
 import twitter4j.TwitterFactory
 import twitter4j.conf.ConfigurationBuilder
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.ResourceBundle
 
 const val TIME_FORMAT = "\"%d-%02d-%02d_%02d:%02d:%02d_JST\""
+const val TABLE_DATE_FORMAT = "%d-%02d-%02d"
+const val TABLE_TIME_FORMAT = "%02d:%02d:%02d"
 
 val twitterConfig = ResourceBundle.getBundle("twitter", YamlResourceBundle.Control)
 
@@ -83,10 +88,11 @@ fun putTweetList(): List<Tweet> {
     }
     val client = AmazonDynamoDBClientBuilder.defaultClient()
     list.forEach {
+        val time = it.time
         val values = mapOf(
-            "id" to AttributeValue().withN(it.id.toString()),
-            "time" to AttributeValue().withN(it.time.atZone(ZoneId.systemDefault()).toEpochSecond().toString()),
-            "text" to AttributeValue().withS(it.text)
+            "tweet_date" to AttributeValue().withS(TABLE_DATE_FORMAT.format(time.year, time.month.value, time.dayOfMonth)),
+            "tweet_time" to AttributeValue().withS(TABLE_TIME_FORMAT.format(time.hour, time.minute, time.second)),
+            "tweet_text" to AttributeValue().withS(it.text)
         )
         val request = PutItemRequest().withItem(values).withTableName("Tweet")
         client.putItem(request)
@@ -95,9 +101,11 @@ fun putTweetList(): List<Tweet> {
     return list
 }
 
-fun getTweetListByMonthDay(accountName: String, month: Int, day: Int): Map<Int, List<Tweet>> {
+fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<Tweet>> {
     // TODO DynamoDBからの取得に変更
-    val paging = Paging(1, 5)
+    val client = AmazonDynamoDBClientBuilder.defaultClient()
+    val dynamoDb = DynamoDB(client)
+    val table = dynamoDb.getTable("Tweet")
 
     val cb = ConfigurationBuilder()
     cb.setDebugEnabled(true)
@@ -108,21 +116,29 @@ fun getTweetListByMonthDay(accountName: String, month: Int, day: Int): Map<Int, 
     val tf = TwitterFactory(cb.build())
 
     val twitter = tf.instance
-    val twitterUser = twitter.showUser(accountName)
+    val twitterUser = twitter.showUser(twitterConfig.getString("account_name"))
 
     val startYear = LocalDateTime.ofInstant(twitterUser.createdAt.toInstant(), ZoneId.systemDefault()).year
     val currentYear = LocalDateTime.now().year
 
     val tweetMap = mutableMapOf<Int, List<Tweet>>()
     for (year in startYear..currentYear) {
-        val since = TIME_FORMAT.format(year, month, day, 0, 0, 0)
-        val until = TIME_FORMAT.format(year, month, day, 23, 59, 59)
+        val date = "$year-$month-$day"
+        val since = "00:00:00"
+        val until = "23:59:59"
 
-        val query = Query("from:$accountName since:$since until:$until")
-        val queryResults = twitter.search(query).tweets
+        val query = QuerySpec()
+            .withProjectionExpression("tweet_date, tweet_time, tweet_text")
+            .withKeyConditionExpression("tweet_date = :v_date and tweet_time between :v_since and :v_until")
+            .withValueMap(ValueMap().withString(":v_date", date).withString(":v_since", since).withString(":v_until", until))
 
+        val queryResults = table.query(query)
+
+        println(queryResults.toList())
         tweetMap[year] = queryResults.map {
-            Tweet(it.id, LocalDateTime.ofInstant(it.createdAt.toInstant(), ZoneId.systemDefault()), it.text)
+//            val instant = Instant.ofEpochSecond(it.getLong("tweet_timestamp"))
+//            Tweet(it.getLong("id"), LocalDateTime.ofInstant(instant, ZoneId.systemDefault()), it.getString("tweet_text"))
+            Tweet(1, LocalDateTime.now(), it.getString("tweet_text"))
         }
     }
 
