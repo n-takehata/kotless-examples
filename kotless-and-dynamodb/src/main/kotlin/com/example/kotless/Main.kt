@@ -1,5 +1,7 @@
 package com.example.kotless
 
+import com.example.kotless.TweetTable.getTweetListByMonthDay
+import com.example.kotless.TweetTable.putTweetList
 import io.kotless.dsl.lang.http.Get
 
 @Get("/put")
