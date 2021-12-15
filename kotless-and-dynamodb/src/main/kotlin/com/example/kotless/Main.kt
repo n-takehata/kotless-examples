@@ -6,7 +6,7 @@ import io.kotless.dsl.lang.http.Get
 fun put() = putItem()
 
 @Get("/find")
-fun find() = findItem()
+fun find() = getTweetListByMonthDay(12, 13)
 
 @Get("/tweet")
 fun tweet() = putTweetList()

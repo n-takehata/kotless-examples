@@ -8,10 +8,10 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest
 import dev.akkinoc.util.YamlResourceBundle
+import io.kotless.dsl.lang.event.Scheduled
 import twitter4j.Query
 import twitter4j.TwitterFactory
 import twitter4j.conf.ConfigurationBuilder
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.ResourceBundle
@@ -46,7 +46,6 @@ fun findItem(): String {
     return result["id"].toString()
 }
 
-//@Scheduled(Scheduled.everyMinute)
 private fun putItemEveryMinute() {
     val id = (Math.random() * 1000).toInt().toString()
     val client = AmazonDynamoDBClientBuilder.defaultClient()
@@ -60,6 +59,7 @@ private fun putItemEveryMinute() {
     client.putItem(request)
 }
 
+@Scheduled("0 0 1/1 * ? *")
 fun putTweetList(): List<Tweet> {
     val cb = ConfigurationBuilder()
     cb.setDebugEnabled(true)
@@ -91,7 +91,13 @@ fun putTweetList(): List<Tweet> {
         val time = it.time
         val values = mapOf(
             "id" to AttributeValue().withN(it.id.toString()),
-            "tweet_date" to AttributeValue().withS(TABLE_DATE_FORMAT.format(time.year, time.month.value, time.dayOfMonth)),
+            "tweet_date" to AttributeValue().withS(
+                TABLE_DATE_FORMAT.format(
+                    time.year,
+                    time.month.value,
+                    time.dayOfMonth
+                )
+            ),
             "tweet_time" to AttributeValue().withS(TABLE_TIME_FORMAT.format(time.hour, time.minute, time.second)),
             "tweet_text" to AttributeValue().withS(it.text)
         )
@@ -102,7 +108,7 @@ fun putTweetList(): List<Tweet> {
     return list
 }
 
-fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<Tweet>> {
+fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<GetTweetListResponse>> {
     val client = AmazonDynamoDBClientBuilder.defaultClient()
     val dynamoDb = DynamoDB(client)
     val table = dynamoDb.getTable("Tweet")
@@ -122,7 +128,7 @@ fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<Tweet>> {
     val startYear = LocalDateTime.ofInstant(twitterUser.createdAt.toInstant(), ZoneId.systemDefault()).year
     val currentYear = LocalDateTime.now().year
 
-    val tweetMap = mutableMapOf<Int, List<Tweet>>()
+    val tweetMap = mutableMapOf<Int, List<GetTweetListResponse>>()
     for (year in startYear..currentYear) {
         val date = "$year-$month-$day"
         val since = "00:00:00"
@@ -131,12 +137,18 @@ fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<Tweet>> {
         val query = QuerySpec()
             .withProjectionExpression("id, tweet_date, tweet_time, tweet_text")
             .withKeyConditionExpression("tweet_date = :v_date and tweet_time between :v_since and :v_until")
-            .withValueMap(ValueMap().withString(":v_date", date).withString(":v_since", since).withString(":v_until", until))
+            .withValueMap(
+                ValueMap().withString(":v_date", date).withString(":v_since", since).withString(":v_until", until)
+            )
 
         val queryResults = index.query(query)
 
         tweetMap[year] = queryResults.map {
-            Tweet(it.getLong("id"), LocalDateTime.now(), it.getString("tweet_text"))
+            GetTweetListResponse(
+                it.getLong("id"),
+                "${it.getString("tweet_date")} ${it.getString("tweet_time")}",
+                it.getString("tweet_text")
+            )
         }
     }
 
