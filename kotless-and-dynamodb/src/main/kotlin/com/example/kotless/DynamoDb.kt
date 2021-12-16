@@ -26,18 +26,17 @@ val twitterConfig = ResourceBundle.getBundle("twitter", YamlResourceBundle.Contr
 // TODO 関数名の変更
 @DynamoDBTable("Tweet", PermissionLevel.ReadWrite)
 object TweetTable {
-    @Scheduled("0 0 1/1 * ? *")
-    fun putTweetList(): List<Tweet> {
-        // TODO Twitter client生成の共通化
-        val cb = ConfigurationBuilder()
-        cb.setDebugEnabled(true)
+    private val twitterClient = TwitterFactory(
+        ConfigurationBuilder().setDebugEnabled(true)
             .setOAuthConsumerKey(twitterConfig.getString("consume_key"))
             .setOAuthConsumerSecret(twitterConfig.getString("consume_secret"))
             .setOAuthAccessToken(twitterConfig.getString("access_token"))
             .setOAuthAccessTokenSecret(twitterConfig.getString("access_token_secret"))
-        val tf = TwitterFactory(cb.build())
+            .build()
+    ).instance
 
-        val twitter = tf.instance
+    @Scheduled("0 0 1/1 * ? *")
+    fun putTweetList(): List<Tweet> {
         val accountName = twitterConfig.getString("account_name")
 
         val lastDate = LocalDateTime.now(ZoneId.of("Asia/Tokyo")).minusDays(1)
@@ -50,7 +49,7 @@ object TweetTable {
         val until = TIME_FORMAT.format(year, month, day, 23, 59, 59)
 
         val query = Query("from:$accountName since:$since until:$until")
-        val queryResults = twitter.search(query).tweets
+        val queryResults = twitterClient.search(query).tweets
 
         val list = queryResults.map {
             Tweet(it.id, LocalDateTime.ofInstant(it.createdAt.toInstant(), ZoneId.systemDefault()), it.text)
@@ -83,16 +82,7 @@ object TweetTable {
         val table = dynamoDb.getTable("Tweet")
         val index = table.getIndex("datetime-index")
 
-        val cb = ConfigurationBuilder()
-        cb.setDebugEnabled(true)
-            .setOAuthConsumerKey(twitterConfig.getString("consume_key"))
-            .setOAuthConsumerSecret(twitterConfig.getString("consume_secret"))
-            .setOAuthAccessToken(twitterConfig.getString("access_token"))
-            .setOAuthAccessTokenSecret(twitterConfig.getString("access_token_secret"))
-        val tf = TwitterFactory(cb.build())
-
-        val twitter = tf.instance
-        val twitterUser = twitter.showUser(twitterConfig.getString("account_name"))
+        val twitterUser = twitterClient.showUser(twitterConfig.getString("account_name"))
 
         val startYear = LocalDateTime.ofInstant(twitterUser.createdAt.toInstant(), ZoneId.systemDefault()).year
         val currentYear = LocalDateTime.now().year
