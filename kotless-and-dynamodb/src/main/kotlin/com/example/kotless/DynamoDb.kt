@@ -23,10 +23,12 @@ const val TABLE_TIME_FORMAT = "%02d:%02d:%02d"
 
 val twitterConfig = ResourceBundle.getBundle("twitter", YamlResourceBundle.Control)
 
+// TODO 関数名の変更
 @DynamoDBTable("Tweet", PermissionLevel.ReadWrite)
 object TweetTable {
     @Scheduled("0 0 1/1 * ? *")
     fun putTweetList(): List<Tweet> {
+        // TODO Twitter client生成の共通化
         val cb = ConfigurationBuilder()
         cb.setDebugEnabled(true)
             .setOAuthConsumerKey(twitterConfig.getString("consume_key"))
@@ -43,6 +45,7 @@ object TweetTable {
         val month = lastDate.month.value
         val day = lastDate.dayOfMonth
 
+        // TODO 時間指定でputする処理の切り出し
         val since = TIME_FORMAT.format(year, month, day, 0, 0, 0)
         val until = TIME_FORMAT.format(year, month, day, 23, 59, 59)
 
