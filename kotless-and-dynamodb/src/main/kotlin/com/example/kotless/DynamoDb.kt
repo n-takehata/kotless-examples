@@ -79,15 +79,15 @@ object TweetTable {
     }
 
     fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<GetTweetListResponse>> {
-        val client = AmazonDynamoDBClientBuilder.defaultClient()
-        val dynamoDb = DynamoDB(client)
-        val table = dynamoDb.getTable("Tweet")
-        val index = table.getIndex("datetime-index")
-
         val twitterUser = twitterClient.showUser(twitterConfig.getString("account_name"))
 
         val startYear = LocalDateTime.ofInstant(twitterUser.createdAt.toInstant(), ZoneId.systemDefault()).year
         val currentYear = LocalDateTime.now().year
+
+        val client = AmazonDynamoDBClientBuilder.defaultClient()
+        val dynamoDb = DynamoDB(client)
+        val table = dynamoDb.getTable("Tweet")
+        val index = table.getIndex("datetime-index")
 
         val tweetMap = mutableMapOf<Int, List<GetTweetListResponse>>()
         for (year in startYear..currentYear) {
