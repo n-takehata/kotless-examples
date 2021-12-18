@@ -23,7 +23,6 @@ const val TABLE_TIME_FORMAT = "%02d:%02d:%02d"
 
 val twitterConfig = ResourceBundle.getBundle("twitter", YamlResourceBundle.Control)
 
-// TODO 関数名の変更
 @DynamoDBTable("Tweet", PermissionLevel.ReadWrite)
 object TweetTable {
     private val twitterClient = TwitterFactory(
