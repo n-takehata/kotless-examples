@@ -36,7 +36,7 @@ object TweetTable {
     ).instance
 
     @Scheduled("0 0 1/1 * ? *")
-    fun putTweetList(): List<Tweet> {
+    private fun putTweetList() {
         val accountName = twitterConfig.getString("account_name")
 
         val lastDate = LocalDateTime.now(ZoneId.of("Asia/Tokyo")).minusDays(1)
@@ -44,10 +44,13 @@ object TweetTable {
         val month = lastDate.month.value
         val day = lastDate.dayOfMonth
 
-        // TODO 時間指定でputする処理の切り出し
         val since = TIME_FORMAT.format(year, month, day, 0, 0, 0)
         val until = TIME_FORMAT.format(year, month, day, 23, 59, 59)
 
+        putTweetList(accountName, since, until)
+    }
+
+    fun putTweetList(accountName: String, since: String, until: String): List<Tweet> {
         val query = Query("from:$accountName since:$since until:$until")
         val queryResults = twitterClient.search(query).tweets
 
