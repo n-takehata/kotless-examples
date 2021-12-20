@@ -80,7 +80,6 @@ object TweetTable {
 
     fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<GetTweetListResponse>> {
         val twitterUser = twitterClient.showUser(twitterConfig.getString("account_name"))
-
         val startYear = LocalDateTime.ofInstant(twitterUser.createdAt.toInstant(), ZoneId.systemDefault()).year
         val currentYear = LocalDateTime.now().year
 
@@ -92,16 +91,11 @@ object TweetTable {
         val tweetMap = mutableMapOf<Int, List<GetTweetListResponse>>()
         for (year in startYear..currentYear) {
             val date = "$year-$month-$day"
-            val since = "00:00:00"
-            val until = "23:59:59"
 
             val query = QuerySpec()
                 .withProjectionExpression("id, tweet_date, tweet_time, tweet_text")
-                .withKeyConditionExpression("tweet_date = :v_date and tweet_time between :v_since and :v_until")
-                .withValueMap(
-                    ValueMap().withString(":v_date", date).withString(":v_since", since).withString(":v_until", until)
-                )
-
+                .withKeyConditionExpression("tweet_date = :v_date")
+                .withValueMap(ValueMap().withString(":v_date", date))
             val queryResults = index.query(query)
 
             tweetMap[year] = queryResults.map {
