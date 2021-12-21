@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.ResourceBundle
 
-const val TIME_FORMAT = "\"%d-%02d-%02d_%02d:%02d:%02d_JST\""
+const val TWITTER_TIME_FORMAT = "\"%d-%02d-%02d_%02d:%02d:%02d_JST\""
 const val TABLE_DATE_FORMAT = "%d-%02d-%02d"
 const val TABLE_TIME_FORMAT = "%02d:%02d:%02d"
 
@@ -43,8 +43,8 @@ object TweetTable {
         val month = lastDate.month.value
         val day = lastDate.dayOfMonth
 
-        val since = TIME_FORMAT.format(year, month, day, 0, 0, 0)
-        val until = TIME_FORMAT.format(year, month, day, 23, 59, 59)
+        val since = TWITTER_TIME_FORMAT.format(year, month, day, 0, 0, 0)
+        val until = TWITTER_TIME_FORMAT.format(year, month, day, 23, 59, 59)
 
         putTweetList(accountName, since, until)
     }
