@@ -53,11 +53,11 @@ object TweetTable {
         val query = Query("from:$accountName since:$since until:$until")
         val queryResults = twitterClient.search(query).tweets
 
-        val list = queryResults.map {
+        val tweetList = queryResults.map {
             Tweet(it.id, LocalDateTime.ofInstant(it.createdAt.toInstant(), ZoneId.systemDefault()), it.text)
         }
         val client = AmazonDynamoDBClientBuilder.defaultClient()
-        list.forEach {
+        tweetList.forEach {
             val time = it.time
             val values = mapOf(
                 "id" to AttributeValue().withN(it.id.toString()),
@@ -75,7 +75,7 @@ object TweetTable {
             client.putItem(request)
         }
 
-        return list
+        return tweetList
     }
 
     fun getTweetListByMonthDay(month: Int, day: Int): Map<Int, List<GetTweetListResponse>> {
