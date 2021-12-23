@@ -84,8 +84,7 @@ object TweetTable {
         val currentYear = LocalDateTime.now().year
 
         val client = AmazonDynamoDBClientBuilder.defaultClient()
-        val dynamoDb = DynamoDB(client)
-        val table = dynamoDb.getTable("Tweet")
+        val table = DynamoDB(client).getTable("Tweet")
         val index = table.getIndex("datetime-index")
 
         val tweetMap = mutableMapOf<Int, List<GetTweetListResponse>>()
