@@ -16,6 +16,8 @@ AWSアカウント作成後、以下の記事の`S3のバケットを作成`、`
 
 https://blog.takehata-engineer.com/entry/deploy-kotlin-applications-to-aws-lambda-using-kotless
 
+S3のバケット名は、本アプリケーションでは`example-kotless-and-dynamodb`としています。
+
 ### Twitter APIの登録とAPIキー、トークンの取得
 Twitter APIに登録し、実行に必要な各種情報を取得します。  
 以下のサイトなどを参考に、ご自分のTwitterアカウントで登録してください。
